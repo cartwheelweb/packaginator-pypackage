@@ -1,4 +1,5 @@
 import locale
+import xmlrpclib
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -7,8 +8,18 @@ from django.utils.datastructures import MultiValueDict
 from django.utils.translation import ugettext_lazy as _
 
 from package.models import Package, Version
+from package.signals import signal_fetch_latest_metadata
 
 locale.setlocale(locale.LC_ALL, '')
+
+def handle_fetch_metada_signal(sending_package, **kwargs):
+    try:
+        pypackage = PyPackage.objects.get(packaginator_package=sending_package)
+    except PyPackage.DoesNotExist:
+        return False
+    pypackage.fetch_releases()
+
+signal_fetch_latest_metadata.connect(handle_fetch_metada_signal)
 
 class PackageInfoField(models.Field):
     """
