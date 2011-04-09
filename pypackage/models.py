@@ -77,6 +77,16 @@ class PyPackage(models.Model):
         except Release.DoesNotExist:
             return None
 
+# TODO need to update this property pulled of packaginator package model
+    # @property
+    # def pypi_version(self):
+        # string_ver_list = self.version_set.values_list('number', flat=True)
+        # if string_ver_list:
+            # vers_list = [versioner(v) for v in string_ver_list]
+            # latest = sorted(vers_list)[-1]
+            # return str(latest)
+        # return ''
+
     def fetch_releases(self, include_hidden=True):
 
 
