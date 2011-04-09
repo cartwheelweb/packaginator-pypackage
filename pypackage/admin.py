@@ -1,4 +1,29 @@
 from django.contrib import admin
-# from pypackage.models import MyModel
+from reversion.admin import VersionAdmin
 
-# admin.site.register(MyModel, MyModelAdmin)
+from package.models import Category, Package, PackageExample, Commit, Version
+
+class PackageExampleInline(admin.TabularInline):
+    model = PackageExample
+
+class PyPackageAdmin(VersionAdmin):
+
+    save_on_top = True
+    search_fields = ("title",)
+    list_filter = ("category",)
+    list_display = ("title", "created", )
+    date_hierarchy = "created"
+    inlines = [
+        PackageExampleInline,
+    ]
+    fieldsets = (
+        (None, {
+            "fields": ("title", "slug", "category", "pypi_url", "repo_url", "usage", "created_by", "last_modified_by","pypi_home_page",)
+        }),
+        ("Pulled data", {
+            "classes": ("collapse",),
+            "fields": ("repo_description", "repo_watchers", "repo_forks", "repo_commits", "pypi_downloads", "participants")
+        }),
+    )
+
+admin.site.register(Package, PyPackageAdmin)
