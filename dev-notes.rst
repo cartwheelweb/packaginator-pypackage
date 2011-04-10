@@ -14,3 +14,5 @@ should hidden and download be moved to pypi release?
 downloads would not count github downloads, and so really mean pypi downloads
 and so maybe belong on the pypi specific model?
 
+need to remove downloads, and hidden off of main package version, and wrap
+usage in pypackage views etc.
