@@ -26,4 +26,4 @@ class PyPackageAdmin(VersionAdmin):
         }),
     )
 
-admin.site.register(Package, PyPackageAdmin)
+# admin.site.register(Package, PyPackageAdmin)
