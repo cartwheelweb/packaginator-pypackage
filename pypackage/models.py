@@ -12,7 +12,8 @@ from package.signals import signal_fetch_latest_metadata
 
 locale.setlocale(locale.LC_ALL, '')
 
-def handle_fetch_metada_signal(sending_package, **kwargs):
+def handle_fetch_metada_signal(**kwargs):
+    sending_package = kwargs.get('sender')
     try:
         pypackage = PyPackage.objects.get(packaginator_package=sending_package)
     except PyPackage.DoesNotExist:
