@@ -9,7 +9,6 @@ from pypackage.models import PyPackage
 
 pypi_url_help_text = settings.PACKAGINATOR_HELP_TEXT['PYPI_URL']
 
-# TODO figure out how to get the settings.PACKAGINATOR_HELP_TEXT into the form
 class PyPackageForm(ModelForm):
     pypi_slug = forms.CharField(max_length=100, required=False,
             help_text=pypi_url_help_text)
