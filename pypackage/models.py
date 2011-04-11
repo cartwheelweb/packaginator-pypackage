@@ -4,6 +4,7 @@ import xmlrpclib
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Sum
+from django.template.defaultfilters import slugify
 from django.utils import simplejson as json
 from django.utils.datastructures import MultiValueDict
 from django.utils.translation import ugettext_lazy as _
@@ -28,16 +29,27 @@ class PypiVersion(object):
     def __init__(self, release_data):
         self.__dict__.update(release_data)
 
+class PyPackageManager(models.Manager):
+    def create_with_package(self, *args, **kwargs):
+        package, created = Package.objects.get_or_create(
+                title=kwargs['name'],
+                slug=slugify(kwargs['name']))
+        kwargs['packaginator_package'] = package
+        return super(PyPackageManager, self).create(*args, **kwargs)
+
 class PyPackage(models.Model):
     """
     A representation of a python package on pypi or similar
     strongly coupled to packaginator project
+
+    PyPI interface (see http://wiki.python.org/moin/PyPiXmlRpc)
     """
     packaginator_package = models.OneToOneField(Package, related_name='pypi')
     name = models.CharField(max_length=255, unique=True, editable=False)
     index_api_url = models.URLField(verify_exists=False, max_length=200,
             default="http://pypi.python.org/pypi/")
 
+    objects = PyPackageManager()
     def __unicode__(self):
         return self.name
 
