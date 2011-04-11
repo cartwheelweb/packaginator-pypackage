@@ -35,8 +35,13 @@ class PyPackageManager(models.Manager):
                 title=kwargs['name'],
                 slug=slugify(kwargs['name']))
         kwargs['packaginator_package'] = package
-        # TODO do we fetch releases and try to scrape repo URLs?
-        return super(PyPackageManager, self).create(*args, **kwargs)
+        pypackage = super(PyPackageManager, self).create(*args, **kwargs)
+        pypackage.fetch_releases()
+        package.repo_description = pypackage.latest.summary
+        # TODO implement lookup_repo_url
+        # package.repo_url = pypackage.lookup_repo_url()
+        package.save()
+
 
 class PyPackage(models.Model):
     """
