@@ -11,17 +11,16 @@
 {% endblock %}
 
 {% block body %}
-    
+
     <h1><a href="{% url home %}">{% trans "home" %}</a> / <a href="{% url packages %}">{% trans "packages" %}</a> / {{ package.title }}
         <a href="{% url edit_package package.slug %}"><img src="{{ STATIC_URL }}img/icon_changelink.gif" alt="edit" /></a>
     </h1>
-    
-    
-<div id="package-wrap">    
-      
-      
+
+<div id="package-wrap">
+
+
     <div id="package-left">
-        
+
         <p>
             {{ package.repo_description }}
         </p>
@@ -42,29 +41,29 @@
                         <span class="usage-count" id="usage-count-{{ package.id }}">{{ package.usage.count }}</span>
                         &nbsp;
                         {% with package as package %}
-                            {% usage_button %} 
+                            {% usage_button %}
                         {% endwith %}
                     </td>
                     <td id="fetch-cell"><a class="awesome forestgreen" href="{% url fetch_package_data package.slug %}">{% trans "Fetch latest data" %}</a></td>
-                </tr>    
-            </tbody>        
+                </tr>
+            </tbody>
          </table>
 
-        {% if package.pypi_url and package.pypi_url != "http://pypi.python.org/pypi/" %}
-            <h2>PyPI {% if package.pypi_downloads %}{% blocktrans with package.pypi_downloads as pypi_downloads %}( {{ pypi_downloads }} downloads ){% endblocktrans %}{% endif %}</h2>
+        {% if package.pypi %}
+            <h2>PyPI {% if package.pypi.latest.downloads %}{% blocktrans with package.pypi.downloads as pypi_downloads %}( {{ pypi_downloads }} downloads ){% endblocktrans %}{% endif %}</h2>
             <p><a href="{{ package.pypi_url }}">{{ package.pypi_url }}</a></p>
             <table>
                 <tr>
                     <th>{% trans "Version" %}</th>
-                    <th>{% trans "License" %}</th>                
+                    <th>{% trans "License" %}</th>
                     <th><img src="{{ STATIC_URL }}img/grayarrow_20x20_clear.png" alt="Downloads" /></th>
                 </tr>
-                {% for version in package.version_set.by_version %}
-                    {% if not version.hidden %}
+                {% for release in package.pypi.releases.all %}
+                    {% if not release.hidden %}
                     <tr>
-                        <td>{{ version.number }}</td>
-                        <td>{{ version.license|default:"none" }}</td>                    
-                        <td>{{ version.downloads|default:"n/a" }}</td>
+                        <td>{{ release.version }}</td>
+                        <td>{{ release.license|default:"none" }}</td>
+                        <td>{{ release.downloads|default:"n/a" }}</td>
                     </tr>
                     {% endif %}
                 {% endfor %}
@@ -79,12 +78,12 @@
             {% for participant in package.participant_list %}
                 <a href="{% participant_url package.repo participant %}">{{ participant }}</a>
             {% endfor %}
-        
+
         </p>
-    
+
     </div>
     <div id="package-right">
-        
+
         <h2 class="rtd" style="display: none;">{% trans "Read the Docs" %}</h2>
         <p class="rtd" style="display: none;">{% blocktrans %}This project has documentation available for it on <a class="rtd">Read the Docs!</a>{% endblocktrans %}</p>
 
@@ -102,20 +101,20 @@
                 <td>{{ package.repo_watchers|default:"n/a" }}</td>
                 <td>{{ package.repo_forks|default:"n/a" }}</td>
             </tr>
-        </table>        
+        </table>
 
         {% if request.user.is_authenticated and profile.can_add_grid %}
             <h2>{% trans "Comparison Grids" %}</h2>
-        
+
             {% for grid in package.grids %}
                 <a href="{% url grid grid.slug %}" title="{{ grid.description }}">{{ grid }}</a>
-            
+
                 {% if forloop.last %}
                     <div id="package-gridname">
                         <a class="awesome forestgreen" id="find-a-grid" href="#">Find another grid to join!</a>
                         {% include "package/includes/_attach_grid.html" %}
-                    </div>    
-            
+                    </div>
+
                 {% endif %}
             {% empty %}
                 <div id="package-gridname">
@@ -125,13 +124,13 @@
             {% endfor %}
         {% endif %}
         <h2>{% trans "Sites using this package" %}</h2>
-    
+
         <div id="package-editlink">
-            {% if request.user.is_authenticated %}        
+            {% if request.user.is_authenticated %}
                 <a class="awesome forestgreen" href="{% url add_example package.slug %}">{% trans "Add an example" %}</a>
             {% endif %}
         </div>
-    
+
         {% with package.active_examples as examples %}
         {% if examples %}
         <ol id="package-sitelist">
@@ -148,10 +147,10 @@
         </ol>
         {% endif %}
         {% endwith %}
-    
+
     </div>
-    
-</div>    
+
+</div>
 
 {% endblock %}
 
@@ -175,20 +174,20 @@
             $('#find-a-grid').hide();
             $('#find-a-grid-form').show();
             $('#find-a-grid-input').focus();
-            
+
             $('#find-a-grid-input').keyup(function() {
                 var search_text = $('input#find-a-grid-input').attr('value');
                 var search_text = '{% url ajax_grid_list %}?q=' + search_text + '&package_id={{ package.id }}';
                 $.get(search_text, function(data) {
                   $('#target').html(data).show("slow");
-                });                
-            });                
+                });
+            });
 
             $("#find-a-grid-form").keypress(function(e) {
                   if (e.which == 13) {
                     return false;
                   };
-            });       
+            });
 
         });
         var url = "http://readthedocs.org/api/v1/build/{{ package.slug }}/?format=jsonp";
@@ -199,11 +198,11 @@
               if (data.objects.length > 0){
                   var href = "http://readthedocs.org/projects/{{ package.slug }}";
                   $("a.rtd").attr("href", href);
-                  $(".rtd").show();            
+                  $(".rtd").show();
               };
           }
         });
 
-    });    
-</script>      
-{% endblock %}      
+    });
+</script>
+{% endblock %}
