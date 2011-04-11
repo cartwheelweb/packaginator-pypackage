@@ -132,7 +132,7 @@ class PyPackage(models.Model):
                 )
             for attr in release_data.__dict__:
                 if attr == 'classifiers':
-                    this_release.pypi_classifiers ='\n'.join(getattr(release_data, attr))
+                    this_release._classifiers ='\n'.join(getattr(release_data, attr))
                     continue
 
                 if hasattr(this_release, attr):
@@ -157,8 +157,7 @@ class ReleaseManager(models.Manager):
 class PyRelease(models.Model):
     author = models.CharField(max_length=128, blank=True)
     author_email = models.EmailField(max_length=75, blank=True)
-    # classifiers is reserved word
-    pypi_classifiers = models.TextField(blank=True)
+    _classifiers = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True, editable=False)
     description = models.TextField(blank=True)
     download_url = models.URLField(verify_exists=False, max_length=200, blank=True)
@@ -199,21 +198,7 @@ class PyRelease(models.Model):
     def release_name(self):
         return u"%s-%s" % (self.pypackage.name, self.version)
 
-    # @property
-    # def summary(self):
-        # return self.package_info.get('summary', u'')
-
-    # @property
-    # def description(self):
-        # return self.package_info.get('description', u'')
-
     @property
     def classifiers(self):
-        return self.package_info.getlist('classifier')
-
-    # @models.permalink
-    # def get_absolute_url(self):
-        # return ('djangopypi-release', (), {'package': self.package.name,
-                                           # 'version': self.version})
-
+        return self._classifiers.split('\n')
 
