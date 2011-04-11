@@ -99,15 +99,3 @@ $("#id_repo_url").change(function(e) {
     });
 });
 
-$("#package-form").submit(function(e) {
-    // hack to get around some database vs front end weirdness
-    var pypi_slug = $("#id_pypi_slug").val();
-    if (pypi_slug.length > 0){
-      $("#id_pypi_slug").attr("name", "nuke");
-      $("#temp").val(pypi_slug_g + pypi_slug);
-      earchCompleteStop()
-
-    };
-    
-    return true
-});
