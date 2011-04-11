@@ -119,9 +119,6 @@ class PyPackage(models.Model):
             packaginator_version, created = Version.objects.get_or_create(
                     package=self.packaginator_package,
                     number=version)
-            # TODO hidden and downloads will probably come off this model
-            # packaginator_version.downloads = release_data.downloads
-            # packaginator_version.hidden = release_data.hidden
             packaginator_version.license = release_data.license
             packaginator_version.save()
 
