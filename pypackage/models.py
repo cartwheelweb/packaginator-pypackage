@@ -35,12 +35,13 @@ class PyPackageManager(models.Manager):
                 title=kwargs['name'],
                 slug=slugify(kwargs['name']))
         kwargs['packaginator_package'] = package
+        # TODO do we fetch releases and try to scrape repo URLs?
         return super(PyPackageManager, self).create(*args, **kwargs)
 
 class PyPackage(models.Model):
     """
-    A representation of a python package on pypi or similar
-    strongly coupled to packaginator project
+    A representation of a python package on pypi or similar.
+    Strongly coupled to packaginator project.
 
     PyPI interface (see http://wiki.python.org/moin/PyPiXmlRpc)
     """
@@ -76,14 +77,20 @@ class PyPackage(models.Model):
                         "No package named %s could be found indexed at %s" %
                         (self.name, self.index_api_url))
 
-        super(PyPackage, self).save(*args, **kwargs)
+        # TODO do we fetch releases on save?
+        return super(PyPackage, self).save(*args, **kwargs)
 
     def fetch_releases(self, include_hidden=True):
 
         package_name = self.name
         proxy = xmlrpclib.Server(self.index_api_url)
+        releases = proxy.package_releases(package_name, include_hidden)
 
-        for version in proxy.package_releases(package_name, include_hidden):
+        if not releases:
+            # TODO is this an error?
+            pass
+
+        for version in releases:
             try:
                 this_release = self.releases.get(version=version)
                 # if we have a release already - skip it
