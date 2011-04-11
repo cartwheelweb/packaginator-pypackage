@@ -67,6 +67,15 @@ class PyPackage(models.Model):
     def save(self, *args, **kwargs):
         if not self.name:
             self.name = self.packaginator_package.title
+        if not self.id:
+            # first save, make sure we have releases
+            proxy = xmlrpclib.Server(self.index_api_url)
+            releases = proxy.package_releases(self.name)
+            if not releases:
+                raise ValueError(
+                        "No package named %s could be found indexed at %s" %
+                        (self.name, self.index_api_url))
+
         super(PyPackage, self).save(*args, **kwargs)
 
     def fetch_releases(self, include_hidden=True):
