@@ -3,6 +3,7 @@ import xmlrpclib
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Sum
 from django.utils import simplejson as json
 from django.utils.datastructures import MultiValueDict
 from django.utils.translation import ugettext_lazy as _
@@ -82,6 +83,10 @@ class PyPackage(models.Model):
             return self.releases.latest()
         except PyRelease.DoesNotExist:
             return None
+
+    @property
+    def downlaods(self):
+        return self.releases.filter(hidden=False).aggregate(Sum('downloads'))['downloads__sum'] or 0
 
     def save(self, *args, **kwargs):
         if not self.name:
