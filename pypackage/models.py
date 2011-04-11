@@ -28,42 +28,6 @@ class PypiVersion(object):
     def __init__(self, release_data):
         self.__dict__.update(release_data)
 
-class PackageInfoField(models.Field):
-    """
-    a basic jsonfield implementation
-    """
-    description = u'Python Package Information Field'
-    __metaclass__ = models.SubfieldBase
-
-    def __init__(self, *args, **kwargs):
-        kwargs['editable'] = False
-        super(PackageInfoField,self).__init__(*args, **kwargs)
-
-    def to_python(self, value):
-        if isinstance(value, basestring):
-            if value:
-                return MultiValueDict(json.loads(value))
-            else:
-                return MultiValueDict()
-        if isinstance(value, dict):
-            return MultiValueDict(value)
-        if isinstance(value,MultiValueDict):
-            return value
-        raise ValueError('Unexpected value encountered when converting data to python')
-
-    def get_prep_value(self, value):
-        if isinstance(value,MultiValueDict):
-            return json.dumps(dict(value.iterlists()))
-        if isinstance(value, dict):
-            return json.dumps(value)
-        if isinstance(value, basestring) or value is None:
-            return value
-
-        raise ValueError('Unexpected value encountered when preparing for database')
-
-    def get_internal_type(self):
-        return 'TextField'
-
 class PyPackage(models.Model):
     """
     A representation of a python package on pypi or similar
@@ -180,7 +144,6 @@ class PyRelease(models.Model):
     metadata_version = models.CharField(max_length=64, default='1.0')
     # TODO is name for a release ever different then on package?
     # name = models.CharField(max_length=255, blank=True)
-    package_info = PackageInfoField(blank=False)
     packaginator_version = models.OneToOneField(Version, related_name = 'pypi')
     platform = models.CharField(max_length=128, blank=True)
     pypackage = models.ForeignKey(PyPackage, related_name="releases", editable=False)
