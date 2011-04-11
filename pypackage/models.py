@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from package.models import Package, Version
 from package.signals import signal_fetch_latest_metadata
+from package.utils import get_version
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -82,16 +83,6 @@ class PyPackage(models.Model):
         except PyRelease.DoesNotExist:
             return None
 
-# TODO need to update this property pulled of packaginator package model
-    # @property
-    # def pypi_version(self):
-        # string_ver_list = self.version_set.values_list('number', flat=True)
-        # if string_ver_list:
-            # vers_list = [versioner(v) for v in string_ver_list]
-            # latest = sorted(vers_list)[-1]
-            # return str(latest)
-        # return ''
-
     def save(self, *args, **kwargs):
         if not self.name:
             self.name = self.packaginator_package.title
@@ -153,6 +144,19 @@ class PyPackage(models.Model):
                         setattr(this_release, attr, val)
             this_release.save()
 
+class ReleaseManager(models.Manager):
+
+    def by_version(self):
+        qs = self.get_query_set()
+        return sorted(qs,key=lambda r: get_version(r.version))
+
+    def latest(self):
+        by_version = self.by_version()
+        if by_version:
+            return by_version[-1]
+        else:
+            return None
+
 class PyRelease(models.Model):
     author = models.CharField(max_length=128, blank=True)
     author_email = models.EmailField(max_length=75, blank=True)
@@ -180,6 +184,8 @@ class PyRelease(models.Model):
     stable_version = models.CharField(max_length=128, blank=True)
     summary = models.TextField(blank=True)
     version = models.CharField(max_length=128, editable=False)
+
+    objects = ReleaseManager()
 
     # TODO publish date from release_urls upload time?
 
