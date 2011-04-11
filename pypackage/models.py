@@ -62,7 +62,7 @@ class PyPackage(models.Model):
             return None
 
     @property
-    def downlaods(self):
+    def downloads(self):
         return self.releases.filter(hidden=False).aggregate(Sum('downloads'))['downloads__sum'] or 0
 
     def save(self, *args, **kwargs):
