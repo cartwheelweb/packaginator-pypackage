@@ -6,6 +6,10 @@ from package.views import (
         add_package
         )
 
+from grid.views import (
+        grid_detail,
+        )
+
 overridden_urlpatterns = patterns('',
     # url(
         # regex   = r"^$",
@@ -18,5 +22,17 @@ overridden_urlpatterns = patterns('',
         view    = add_package,
         name    = "add_package",
         kwargs  = {'form_class': PyPackageForm}
+    ),
+
+    url(
+    regex = '^grids/g/(?P<slug>[-\w]+)/$',
+    view    = grid_detail,
+    name    = 'grid',
+    kwargs  = {'additional_attributes':
+                (
+                    ('pypi.latest.downloads', 'Downloads'),
+                    ('pypi.latest.version', 'Version'),
+                )
+                },
     ),
 )
