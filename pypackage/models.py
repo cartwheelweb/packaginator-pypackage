@@ -1,14 +1,13 @@
 import locale
+import re
 import xmlrpclib
 
-from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Sum
 from django.template.defaultfilters import slugify
-from django.utils import simplejson as json
-from django.utils.datastructures import MultiValueDict
 from django.utils.translation import ugettext_lazy as _
 
+from package import repos
 from package.models import Package, Version
 from package.signals import signal_fetch_latest_metadata
 from package.utils import get_version
@@ -38,8 +37,7 @@ class PyPackageManager(models.Manager):
         pypackage = super(PyPackageManager, self).create(*args, **kwargs)
         pypackage.fetch_releases()
         package.repo_description = pypackage.latest.summary
-        # TODO implement lookup_repo_url
-        # package.repo_url = pypackage.lookup_repo_url()
+        package.repo_url = pypackage.lookup_repo_url()
         package.save()
 
 
@@ -84,6 +82,23 @@ class PyPackage(models.Model):
 
         # TODO do we fetch releases on save?
         return super(PyPackage, self).save(*args, **kwargs)
+
+    def lookup_repo_url(self, version=None):
+        if version:
+            release = self.releases.get(version=version)
+        else:
+            release = self.latest
+        handler = repos.get_repo_for_repo_url(release.home_page)
+        if isinstance(handler, repos.unsupported.UnsupportedHandler):
+            return ''
+        elif isinstance(handler, repos.github.GitHubHandler):
+            repo_pattern = '((?:http|https|git)://github.com/[^/]*/[^/]*)/{0,1}'
+            match = re.match(repo_pattern, release.home_page)
+            if match and match.group(1):
+                return match.group(1)
+        else:
+            # only github is special cased for now
+            return release.home_page
 
     def fetch_releases(self, include_hidden=True):
 
