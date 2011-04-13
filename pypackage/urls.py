@@ -9,8 +9,8 @@ from package.views import (
 GRID_ATTRIBUTES = [
                 ('repo_description', 'Description'),
                 ('category','Category'),
-                ('last_updated', 'Last Updated'),
                 ('pypi.latest.downloads', 'Downloads'),
+                ('last_updated', 'Last Updated'),
                 ('pypi.latest.version', 'Version'),
                 ('repo', 'Repo'),
                 ('commits_over_52', 'Commits'),
