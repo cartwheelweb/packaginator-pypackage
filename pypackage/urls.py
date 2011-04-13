@@ -6,6 +6,19 @@ from package.views import (
         add_package
         )
 
+GRID_ATTRIBUTES = [
+                ('repo_description', 'Description'),
+                ('category','Category'),
+                ('last_updated', 'Last Updated'),
+                ('pypi.latest.downloads', 'Downloads'),
+                ('pypi.latest.version', 'Version'),
+                ('repo', 'Repo'),
+                ('commits_over_52', 'Commits'),
+                ('repo_watchers', 'Repo watchers'),
+                ('repo_forks', 'Forks'),
+                ('participant_list', 'Participants')
+            ]
+
 from grid.views import (
         grid_detail,
         )
@@ -28,11 +41,6 @@ overridden_urlpatterns = patterns('',
     regex = '^grids/g/(?P<slug>[-\w]+)/$',
     view    = grid_detail,
     name    = 'grid',
-    kwargs  = {'additional_attributes':
-                (
-                    ('pypi.latest.downloads', 'Downloads'),
-                    ('pypi.latest.version', 'Version'),
-                )
-                },
+    kwargs  = {'attributes':GRID_ATTRIBUTES},
     ),
 )
